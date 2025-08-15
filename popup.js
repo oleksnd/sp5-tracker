@@ -1,5 +1,4 @@
-const skipBreakButton = document.getElementById('skipBreakButton');
-const addSpButton = document.getElementById('addSpButton');
+const skipButton = document.getElementById('skipButton');
 const timerView = document.getElementById('timerView');
 const completionView = document.getElementById('completionView');
 const modeLabel = document.getElementById('mode');
@@ -16,27 +15,22 @@ const WORK_MINUTES = 45; // Константа для отображения н�
 
 // --- Основная функция обновления интерфейса ---
 async function updateUI() {
-    // Получаем все актуальные данные из хранилища
     const data = await chrome.storage.local.get([
         'timerState', 'spCount', 'dailyGoal', 'alarmTime', 'remainingTime', 'lastResetDate'
     ]);
-
-    // Проверяем, не наступил ли новый день. Если да - сбрасываем счетчик.
     const today = new Date().toLocaleDateString();
     if (data.lastResetDate !== today) {
         chrome.runtime.sendMessage({ command: 'end_day' }, () => setTimeout(updateUI, 100));
         return;
     }
-
-    // Деструктуризация переменных для удобства. Добавляем значения по умолчанию.
     const { timerState = 'initial', spCount = 0, dailyGoal = 5, alarmTime, remainingTime } = data;
 
-    // Показывать кнопку пропуска паузы только во время break
-    if (skipBreakButton) {
-        if (timerState === 'break') {
-            skipBreakButton.classList.remove('hidden');
+    // Кнопка "Пропустить" видна только во время работы или перерыва
+    if (skipButton) {
+        if (timerState === 'work' || timerState === 'break') {
+            skipButton.classList.remove('hidden');
         } else {
-            skipBreakButton.classList.add('hidden');
+            skipButton.classList.add('hidden');
         }
     }
 
@@ -59,10 +53,8 @@ async function updateUI() {
         completionView.classList.add('hidden');
     }
 
-    // Очистка старого интервала, чтобы избежать дублирования
     if (uiUpdateInterval) clearInterval(uiUpdateInterval);
 
-    // Обновление таймера и кнопок
     let displayTime, label, buttonText;
     switch (timerState) {
         case 'work':
@@ -119,26 +111,14 @@ function setupEventListeners() {
             chrome.runtime.sendMessage({ command: 'main_action' }, () => setTimeout(updateUI, 100));
         });
     }
+    if (skipButton) {
+        skipButton.addEventListener('click', () => {
+            chrome.runtime.sendMessage({ command: 'skip_cycle' }, () => setTimeout(updateUI, 100));
+        });
+    }
     if (endDayButton) {
         endDayButton.addEventListener('click', () => {
             chrome.runtime.sendMessage({ command: 'end_day' }, () => setTimeout(updateUI, 100));
-        });
-    }
-    if (startAnotherButton) {
-        startAnotherButton.addEventListener('click', () => {
-            chrome.runtime.sendMessage({ command: 'main_action' }, () => setTimeout(updateUI, 100));
-        });
-    }
-    if (skipBreakButton) {
-        skipBreakButton.addEventListener('click', () => {
-            chrome.runtime.sendMessage({ command: 'skip_break' }, () => setTimeout(updateUI, 100));
-        });
-    }
-    if (addSpButton) {
-        addSpButton.addEventListener('click', () => {
-            chrome.storage.local.get(['spCount', 'dailyGoal'], ({ spCount = 0, dailyGoal = 5 }) => {
-                chrome.storage.local.set({ spCount: Math.min(spCount + 1, dailyGoal) }, updateUI);
-            });
         });
     }
 }

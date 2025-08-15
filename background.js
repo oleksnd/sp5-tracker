@@ -53,8 +53,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         case 'skip_break':
           await skipBreak();
           break;
+        case 'skip_cycle':
+          await skipCycle();
+          break;
         default:
-          // Неизвестная команда — ничего не делаем
           break;
       }
       sendResponse({ status: "ok" });
@@ -66,6 +68,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true;
 });
 
+// Пропуск текущего цикла (работа или перерыв)
+async function skipCycle() {
+  const { timerState, spCount, dailyGoal } = await chrome.storage.local.get(['timerState', 'spCount', 'dailyGoal']);
+  if (timerState === 'work') {
+    const newSpCount = spCount + 1;
+    await chrome.storage.local.set({ timerState: 'break', spCount: newSpCount });
+    chrome.alarms.create(ALARM_SP5, { when: Date.now() + BREAK_MINUTES * 60 * 1000 });
+    createNotification('work_skipped', 'Рабочий цикл пропущен', `Выполнено SP: ${newSpCount} из ${dailyGoal}`);
+  } else if (timerState === 'break') {
+    await chrome.storage.local.set({ timerState: 'initial' });
+    await chrome.alarms.clear(ALARM_SP5);
+    createNotification('break_skipped', 'Перерыв пропущен', 'Вы можете начать следующий рабочий цикл.');
+  }
+  await updateBadge();
+}
 // --- Основные действия ---
 async function handleMainAction() {
   const { timerState } = await chrome.storage.local.get(['timerState']);
