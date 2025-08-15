@@ -6,6 +6,23 @@
     <link rel="stylesheet" href="popup.css">
 </head>
 <body>
+    <div id="sp-chart-container">
+        <svg id="sp-chart" width="150" height="150" viewBox="0 0 36 36">
+            <path class="sp-chart-bg"
+                d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831"
+            />
+            <path id="sp-chart-progress" class="sp-chart-progress"
+                stroke-dasharray="0, 100"
+                d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831"
+            />
+            <text id="sp-chart-text" x="18" y="20.35" class="sp-chart-text">0/5</text>
+        </svg>
+        <div id="sp-chart-label" class="sp-chart-label">SP сегодня</div>
+    </div>
     <div class="buttons">
         <button id="mainButton" class="button-primary">Начать работу</button>
         <button id="skipButton" class="button-link hidden">Пропустить</button>

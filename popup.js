@@ -127,4 +127,5 @@ function setupEventListeners() {
 document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     updateUI();
+    setInterval(updateUI, 1000);
 });

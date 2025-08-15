@@ -1,3 +1,16 @@
+.buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: 32px;
+    margin-bottom: 8px;
+}
+.buttons button {
+    width: 90%;
+    max-width: 260px;
+    font-size: 1.1em;
+}
 /* Общие стили */
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
